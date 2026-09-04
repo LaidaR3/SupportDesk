@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SupportDesk.Api.Data;
 using SupportDesk.Api.Services;
 using System.Text.Json.Serialization;
+using SupportDesk.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 
 using (var scope = app.Services.CreateScope())

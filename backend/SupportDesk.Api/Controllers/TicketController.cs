@@ -306,4 +306,143 @@ public class TicketsController : ControllerBase
 
         return await GetTicketById(id);
     }
+
+
+    [HttpPut("{id:int}/status")]
+    public async Task<ActionResult<TicketDto>> ChangeStatus(
+    int id,
+    [FromBody] ChangeStatusDto dto)
+    {
+        var ticket = await _context.Tickets
+            .Include(t => t.AssignedAgent)
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (ticket == null)
+        {
+            return NotFound(new
+            {
+                code = "TICKET_NOT_FOUND",
+                message = $"Ticket with id {id} was not found."
+            });
+        }
+
+        _ticketRules.ApplyStatusTransition(ticket, dto.Status);
+
+        await _context.SaveChangesAsync();
+
+        return await GetTicketById(id);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<TicketDto>> UpdateTicket(
+    int id,
+    [FromBody] UpdateTicketDto dto)
+    {
+        var ticket = await _context.Tickets
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (ticket == null)
+        {
+            return NotFound(new
+            {
+                code = "TICKET_NOT_FOUND",
+                message = $"Ticket with id {id} was not found."
+            });
+        }
+
+        _ticketRules.EnsureTicketIsEditable(ticket);
+
+        var priorityChanged = ticket.Priority != dto.Priority;
+
+        ticket.Title = dto.Title.Trim();
+        ticket.Description = dto.Description.Trim();
+        ticket.CustomerName = dto.CustomerName.Trim();
+        ticket.CustomerEmail = dto.CustomerEmail.Trim();
+
+        if (priorityChanged &&
+            ticket.Status != TicketStatus.Resolved &&
+            ticket.Status != TicketStatus.Closed)
+        {
+            ticket.DueDate = _ticketRules.CalculateDueDate(
+                ticket.CreatedDate,
+                dto.Priority);
+        }
+
+        ticket.Priority = dto.Priority;
+        ticket.LastModifiedDate = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return await GetTicketById(id);
+    }
+
+
+    [HttpPost("{id:int}/comments")]
+    public async Task<ActionResult<CommentDto>> AddComment(
+    int id,
+    [FromBody] AddCommentDto dto)
+    {
+        var ticket = await _context.Tickets
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (ticket == null)
+        {
+            return NotFound(new
+            {
+                code = "TICKET_NOT_FOUND",
+                message = $"Ticket with id {id} was not found."
+            });
+        }
+
+        _ticketRules.EnsureTicketIsEditable(ticket);
+
+        var comment = new Comment
+        {
+            TicketId = ticket.Id,
+            AuthorName = dto.AuthorName.Trim(),
+            Body = dto.Body.Trim(),
+            CreatedDate = DateTime.UtcNow
+        };
+
+        _context.Comments.Add(comment);
+
+        ticket.LastModifiedDate = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        var result = new CommentDto
+        {
+            Id = comment.Id,
+            AuthorName = comment.AuthorName,
+            Body = comment.Body,
+            CreatedDate = comment.CreatedDate
+        };
+
+        return Ok(result);
+    }
+
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteTicket(int id)
+    {
+        var ticket = await _context.Tickets
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (ticket == null)
+        {
+            return NotFound(new
+            {
+                code = "TICKET_NOT_FOUND",
+                message = $"Ticket with id {id} was not found."
+            });
+        }
+
+        _ticketRules.EnsureTicketIsEditable(ticket);
+
+        _context.Tickets.Remove(ticket);
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

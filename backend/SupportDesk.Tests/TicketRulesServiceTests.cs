@@ -1,6 +1,7 @@
 using SupportDesk.Api.Enums;
 using SupportDesk.Api.Models;
 using SupportDesk.Api.Services;
+using SupportDesk.Api.Exceptions;
 
 namespace SupportDesk.Tests;
 
@@ -57,7 +58,7 @@ public class TicketRulesServiceTests
             AssignedAgent = null
         };
 
-        var exception = Assert.Throws<InvalidOperationException>(() =>
+        var exception = Assert.Throws<BusinessRuleException>(() =>
             _service.ValidateStatusTransition(
                 ticket,
                 TicketStatus.InProgress));
@@ -73,7 +74,7 @@ public class TicketRulesServiceTests
             Active = false
         };
 
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<BusinessRuleException>(() =>
             _service.ValidateAgentAssignment(agent));
     }
 }

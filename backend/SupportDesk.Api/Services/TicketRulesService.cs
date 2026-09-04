@@ -1,5 +1,7 @@
 using SupportDesk.Api.Enums;
 using SupportDesk.Api.Models;
+using SupportDesk.Api.Exceptions;
+
 
 namespace SupportDesk.Api.Services;
 
@@ -41,20 +43,23 @@ public class TicketRulesService
     {
         if (ticket.Status == TicketStatus.Closed)
         {
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
+                "TICKET_CLOSED",
                 "A closed ticket cannot be reopened or modified.");
         }
 
         if (!IsValidStatusTransition(ticket.Status, newStatus))
         {
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
+                "INVALID_STATUS_TRANSITION",
                 $"Status transition from {ticket.Status} to {newStatus} is not allowed.");
         }
 
         if (newStatus == TicketStatus.InProgress &&
             (ticket.AssignedAgent == null || !ticket.AssignedAgent.Active))
         {
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
+                "ACTIVE_AGENT_REQUIRED",
                 "An active agent must be assigned before moving the ticket to In Progress.");
         }
     }
@@ -96,7 +101,8 @@ public class TicketRulesService
     {
         if (ticket.Status == TicketStatus.Closed)
         {
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
+                 "TICKET_READ_ONLY",
                 "A closed ticket is read-only.");
         }
     }
@@ -105,7 +111,8 @@ public class TicketRulesService
     {
         if (!agent.Active)
         {
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
+                "INACTIVE_AGENT",
                 "An inactive agent cannot be assigned to a ticket.");
         }
     }
