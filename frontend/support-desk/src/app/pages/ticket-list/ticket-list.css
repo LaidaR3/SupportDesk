@@ -1,0 +1,109 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.header p {
+  margin-top: 8px;
+  color: #666;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.filters input,
+.filters select {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.filters input {
+  min-width: 260px;
+}
+
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #222;
+  color: white;
+}
+
+button.secondary {
+  background: #777;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th,
+td {
+  padding: 14px;
+  border-bottom: 1px solid #e5e5e5;
+  text-align: left;
+}
+
+th {
+  background: #f7f7f7;
+}
+
+tr.overdue {
+  background: #fff2f2;
+}
+
+.state {
+  padding: 30px;
+  text-align: center;
+  color: #666;
+}
+
+.error {
+  padding: 14px;
+  background: #ffe5e5;
+  color: #a40000;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

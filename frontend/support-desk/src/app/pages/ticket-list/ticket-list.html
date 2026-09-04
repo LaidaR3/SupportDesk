@@ -1,0 +1,146 @@
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Support Desk</h1>
+      <p>Manage and track customer support tickets.</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input
+      type="text"
+      [(ngModel)]="search"
+      placeholder="Search reference, title or customer..."
+    />
+
+    <select [(ngModel)]="status">
+      <option [ngValue]="null">All statuses</option>
+
+      @for (item of statuses; track item) {
+        <option [ngValue]="item">
+          {{ item }}
+        </option>
+      }
+    </select>
+
+    <select [(ngModel)]="priority">
+      <option [ngValue]="null">All priorities</option>
+
+      @for (item of priorities; track item) {
+        <option [ngValue]="item">
+          {{ item }}
+        </option>
+      }
+    </select>
+
+    <label class="checkbox">
+      <input
+        type="checkbox"
+        [(ngModel)]="overdue"
+      />
+      Overdue only
+    </label>
+
+    <button (click)="applyFilters()">
+      Apply
+    </button>
+
+    <button
+      class="secondary"
+      (click)="clearFilters()"
+    >
+      Clear
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="state">
+      Loading tickets...
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (!loading && tickets.length === 0) {
+    <div class="state">
+      No tickets found.
+    </div>
+  }
+
+  @if (!loading && tickets.length > 0) {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Title</th>
+            <th>Customer</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Agent</th>
+            <th>Due date</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (ticket of tickets; track ticket.id) {
+            <tr [class.overdue]="ticket.isOverdue">
+              <td>
+                {{ ticket.reference }}
+              </td>
+
+              <td>
+                {{ ticket.title }}
+              </td>
+
+              <td>
+                {{ ticket.customerName }}
+              </td>
+
+              <td>
+                {{ ticket.priority }}
+              </td>
+
+              <td>
+                {{ ticket.status }}
+              </td>
+
+              <td>
+                {{ ticket.assignedAgent?.fullName || 'Unassigned' }}
+              </td>
+
+              <td>
+                {{ ticket.dueDate | date:'medium' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <button
+        (click)="previousPage()"
+        [disabled]="page === 1"
+      >
+        Previous
+      </button>
+
+      <span>
+        Page {{ page }} of {{ totalPages }}
+        · {{ totalCount }} tickets
+      </span>
+
+      <button
+        (click)="nextPage()"
+        [disabled]="page >= totalPages"
+      >
+        Next
+      </button>
+    </div>
+  }
+</div>
